@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Şeker Pembe — Sürpriz</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg1:#ffb3d6;
+      --bg2:#ffd6f2;
+      --bg3:#ffe8f7;
+      --accent:#ff6fb1;
+      --accent2:#8a5cff;
+      --text:#5b2b4f;
+      --ok:#7ef0b0;
+      --no:#ffd77a;
+      --card:#ffffffd9;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto; color:var(--text)}
+
+    body{
+      background:
+        radial-gradient(1200px 800px at 10% 10%, var(--bg3), transparent 60%),
+        radial-gradient(800px 800px at 90% 30%, var(--bg2), transparent 60%),
+        radial-gradient(1000px 800px at 50% 80%, var(--bg1), transparent 60%),
+        linear-gradient(135deg, #ffe0f0 0%, #fff6fb 100%);
+      overflow:hidden;
+    }
+
+    .app{position:relative; height:100%; width:100%;}
+    .page{position:absolute; inset:0; display:grid; place-items:center;
+      padding: clamp(12px, 3vw, 32px);
+      opacity:0; transform: translateX(30px) scale(.98);
+      transition: opacity .5s ease, transform .6s ease;
+      pointer-events:none;}
+    .page.active{opacity:1; transform: translateX(0) scale(1); pointer-events:auto;}
+
+    .card{
+      width:min(1000px, 96vw); min-height:min(85vh, 880px);
+      background: var(--card);
+      backdrop-filter: blur(8px);
+      border:1px solid #ffffffa6;
+      border-radius: 28px; box-shadow: 0 20px 60px #ff7eb340;
+      padding: clamp(16px, 2.4vw, 28px);
+      display:grid; gap:18px;
+      grid-template-rows:auto 1fr auto; 
+    }
+    h1{margin:0; font-size: clamp(24px, 4.2vw, 40px); text-align:center}
+
+    .uploader{display:grid; gap:12px; place-items:center; text-align:center; flex:1;}
+    .drop{
+      position:relative; width:min(980px, 98%);
+      background:#fff; border:2px dashed #ff8ec5; border-radius:18px;
+      display:grid; place-items:center; padding:12px; overflow:hidden;
+      height: min(82vh, 880px);
+    }
+    .drop img{width:100%; height:100%; object-fit:contain; display:block; border-radius:12px}
+    .drop .hint{opacity:.75}
+
+    .preview img { object-fit: contain; }
+
+    .btn, button{
+      appearance:none; border:none; cursor:pointer; font-weight:700;
+      padding:14px 20px; border-radius:16px; font-size:16px;
+      background:linear-gradient(135deg, var(--accent), #ffa6d5);
+      color:white; box-shadow:0 10px 24px #ff64b633; transition: transform .1s ease, box-shadow .2s ease;
+    }
+    .btn:hover{transform: translateY(-2px); box-shadow:0 14px 30px #ff64b655}
+    .btn:active{transform: translateY(1px)}
+
+    .controls{display:flex; gap:12px; justify-content:center; flex-wrap:wrap}
+    .tiny{font-size:13px; opacity:.7}
+
+    .rainbow{
+      font-weight:700; text-align:center;
+      background:linear-gradient(90deg, var(--accent), #ffb86b, #7ef0b0, #8a5cff, var(--accent));
+      background-size: 400% 100%;
+      -webkit-background-clip:text; background-clip:text; color:transparent;
+      animation: hue 6s linear infinite;
+      font-size: clamp(18px, 2.2vw, 24px);
+    }
+    @keyframes hue { to { background-position: 400% 0; } }
+
+    .pair{display:grid; gap:14px; justify-items:center}
+    .actions{display:flex; gap:18px; align-items:center; justify-content:center; flex-wrap:wrap}
+
+    .yes, .no{
+      padding: 14px 24px; font-size: clamp(16px, 2.4vw, 22px); border-radius: 999px;
+      display:inline-flex; align-items:center; gap:10px; border:2px solid #00000010;
+      box-shadow: 0 10px 24px #00000012; position:relative;
+    }
+    .yes{ background: radial-gradient(80% 120% at 20% 20%, var(--ok), #d4ffe7); color:#185840; }
+    .no{ background: radial-gradient(80% 120% at 20% 20%, var(--no), #fff1bd); color:#6a4a00; }
+
+    .yes.pulse{ animation: pul 1.2s ease-in-out infinite; }
+    @keyframes pul{0%,100%{box-shadow:0 0 0 0 #7ef0b055} 50%{box-shadow:0 0 0 16px #7ef0b000}}
+
+    @media (max-width:600px){
+      .drop{max-height: 82vh; width: 96vw;}
+    }
+
+    #go2{
+      background: var(--accent);
+      display:block; margin: 20px auto; text-align:center;
+      font-size: 26px; padding: 24px 60px; border-radius: 24px;
+    }
+
+    /* Yüzük kutusu animasyonu */
+    .ring-box{width:200px;height:200px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);perspective:800px;display:none;z-index:10;}
+    .box-top,.box-bottom{position:absolute;left:0;right:0;width:100%;height:50%;background:#b56576;border-radius:12px;transform-style:preserve-3d;backface-visibility:hidden;}
+    .box-top{top:0;transform-origin:bottom;}
+    .box-bottom{bottom:0;}
+    .ring{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;border-radius:50%;border:6px solid gold;box-shadow:0 0 20px gold;}
+    .ring::after{content:'';position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:20px;height:20px;background:deepskyblue;border-radius:50%;box-shadow:0 0 10px deepskyblue;}
+    @keyframes openLid{0%{transform:rotateX(0);}100%{transform:rotateX(-120deg);} }
+    .ring-text{
+      text-align:center;
+      font-size:42px;
+      font-weight:700;
+      position:absolute;
+      top:calc(50% + 180px);
+      left:50%;
+      transform:translateX(-50%);
+      display:none;
+      z-index:11;
+      background:linear-gradient(90deg, var(--accent), #ffb86b, #7ef0b0, #8a5cff, var(--accent));
+      background-size:400% 100%;
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      animation:hue 6s linear infinite, fadeInUp 1.5s ease forwards;
+      opacity:0;
+    }
+    @keyframes fadeInUp{0%{opacity:0;transform:translate(-50%,20px);}100%{opacity:1;transform:translate(-50%,0);}}
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+
+    <!-- SAYFA 1 -->
+    <section class="page active" id="p1">
+      <div class="card">
+        <h1>✨ Merhaba Bubum ✨</h1>
+        <div class="preview" style="display:grid; place-items:center;">
+          <img src="https://media.tenor.com/qQmsOJoeMoMAAAAi/dudu-bubu.gif" alt="Dudu Bubu" style="max-width:100%; border-radius:18px;">
+        </div>
+        <div class="controls">
+          <button class="btn" id="go2">Devam edelim 💖</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAYFA 2 -->
+    <section class="page" id="p2">
+      <div class="card">
+        <h1 class="rainbow">💗 LÖP 💗</h1>
+        <div class="uploader pair" id="uploader1">
+          <div class="drop" id="photoDrop1">
+            <img id="photoPrev1" alt="Bizim Fotoğrafımız" data-gdid="13jEItCm9ocPY9Ac3WvqZtBAvb8imQo6i" referrerpolicy="no-referrer">
+          </div>
+        </div>
+        <div class="rainbow">“Her şeyin bir sonu olduğu doğru ama bizimki birlikte bir son”</div>
+        <div class="actions">
+          <button class="yes pulse" id="yesBtn">Evet 💝</button>
+          <button class="no" id="noBtn">Hayır 🙊</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAYFA 3 -->
+    <section class="page" id="p3">
+      <div class="card">
+        <h1>🖤♾️🖤</h1>
+        <div class="uploader pair" id="uploader2">
+          <div class="drop" id="photoDrop2">
+            <img id="photoPrev2" alt="İkinci Fotoğraf" data-gdid="1ujYhQJjGTynk4Wmw8wjzmylu8oQ7Q2fH" referrerpolicy="no-referrer">
+          </div>
+        </div>
+        <div class="scr-text rainbow">“Elimi tuttuğun süre boyunca elini tutmayı asla bırakmam (Misali yukarıda)”</div>
+        <div class="controls">
+          <button class="btn" id="go4">Bunu eklemesem olmazdı 💫</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SAYFA 4 -->
+    <section class="page" id="p4">
+      <div class="card">
+        <h1>💞 Sürpriz Final</h1>
+        <div class="preview" style="display:grid; place-items:center;">
+          <img id="finalGif" src="https://media.tenor.com/hmYv6-dCkGgAAAAm/bubu-dudu-bubu.webp" alt="Final GIF" style="max-width:100%; border-radius:18px;">
+        </div>
+        <div class="uploader pair" id="uploader3">
+          <div class="drop" id="photoDrop3">
+            <img id="photoPrev3" alt="Üçüncü Fotoğraf" data-gdid="1JcLZkoJfKhdd5a9O1EjYcJ-hygL5SKjY" referrerpolicy="no-referrer">
+          </div>
+        </div>
+        <div class="ring-box" id="ringBox">
+          <div class="box-top"></div>
+          <div class="box-bottom"></div>
+          <div class="ring"></div>
+        </div>
+        <div class="ring-text" id="ringText">Seni seviyorum 💍 Barışalım mı?</div>
+      </div>
+    </section>
+
+  </div>
+
+<script>
+(function(){
+  window.addEventListener('DOMContentLoaded', init);
+
+  function $(sel){ return document.querySelector(sel); }
+  function on(el, evt, fn){ if(el) el.addEventListener(evt, fn); }
+
+  function init(){
+    const p1 = $('#p1'), p2 = $('#p2'), p3 = $('#p3'), p4 = $('#p4');
+    const pages = [p1,p2,p3,p4];
+    let current = 0;
+    function go(i){
+      pages[current]?.classList.remove('active');
+      current = Math.max(0, Math.min(pages.length-1, i));
+      pages[current]?.classList.add('active');
+      if(current===3){
+        setTimeout(()=>{
+          const box=$('#ringBox');
+          const text=$('#ringText');
+          box.style.display='block';
+          box.querySelector('.box-top').style.animation='openLid 2s forwards';
+          setTimeout(()=>{text.style.display='block'; text.style.opacity=1;},2000);
+        },5000);
+      }
+    }
+    on($('#go2'), 'click', ()=> go(1));
+
+    const yes = $('#yesBtn');
+    const no = $('#noBtn');
+    let yesScale = 1;
+    const bounds = $('#p2 .card');
+
+    function flee(btn){
+      if(!bounds || !btn) return;
+      const b = bounds.getBoundingClientRect();
+      const w = btn.offsetWidth, h = btn.offsetHeight, pad = 8;
+      const x = Math.random() * (b.width - w - pad*2) + pad;
+      const y = Math.random() * (b.height - h - pad*2) + pad + 120;
+      btn.style.position = 'absolute'; btn.style.left = x + 'px'; btn.style.top = y + 'px';
+      yesScale = Math.min(6, yesScale + 0.2); yes && (yes.style.transform = `scale(${yesScale})`);
+      if(yes && yesScale > 2) yes.classList.add('pulse');
+    }
+    on(no,'pointerenter', ()=>flee(no));
+    on(no,'pointerdown', ()=>flee(no));
+    bounds && bounds.addEventListener('pointermove', (e)=>{
+      if(!no) return;
+      const nb = no.getBoundingClientRect();
+      const dx = e.clientX - (nb.left + nb.width/2);
+      const dy = e.clientY - (nb.top + nb.height/2);
+      if(Math.hypot(dx,dy) < 120) flee(no);
+    });
+
+    on(yes,'click', ()=>{ if(navigator.vibrate) navigator.vibrate(40); go(2); });
+    on($('#go4'),'click', ()=> go(3));
+
+    const img1 = document.querySelector('#photoPrev1');
+    const id1 = img1?.getAttribute('data-gdid');
+    setDriveImage(img1, id1);
+
+    const img2 = document.querySelector('#photoPrev2');
+    const id2 = img2?.getAttribute('data-gdid');
+    setDriveImage(img2, id2);
+
+    const img3 = document.querySelector('#photoPrev3');
+    const id3 = img3?.getAttribute('data-gdid');
+    setDriveImage(img3, id3);
+  }
+})();
+
+function setDriveImage(img, id){
+  if(!img || !id) return;
+  const candidates = [
+    `https://lh3.googleusercontent.com/d/${id}=w2000`,
+    `https://lh3.googleusercontent.com/d/${id}`,
+    `https://drive.google.com/uc?export=view&id=${id}`,
+    `https://drive.google.com/thumbnail?id=${id}&sz=w2000`
+  ];
+  let idx = 0;
+  const tryNext = ()=>{
+    if(idx >= candidates.length){
+      img.alt = 'Görsel yüklenemedi';
+      img.style.opacity = .7;
+      return;
+    }
+    img.src = candidates[idx++];
+  };
+  img.addEventListener('error', tryNext);
+  tryNext();
+}
+</script>
+</body>
